@@ -161,7 +161,7 @@ Langkah-langkah persiapan data:
    - Rating diprediksi menggunakan rata-rata tertimbang dari rating pengguna-pengguna serupa terhadap film tertentu.
    - Top-N rekomendasi disajikan berdasarkan prediksi rating tertinggi dari film-film yang belum dirating oleh pengguna.
 
-   ![Top-10 Rekomendasi CF untuk userId=2: ]()
+   ![Top-10 Rekomendasi CF untuk userId=2: ](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/testing_CF.png)
    > Insight :
    * Semua film direkomendasikan dengan prediksi rating maksimal (5.00), yang berarti:
       * User-user tetangga yang mirip memberikan rating tinggi pada film tersebut.
@@ -191,7 +191,7 @@ Langkah-langkah persiapan data:
    - nMenentukan movie profile dari representasi genre setiap film.
    - Menggabungkan skor CF dan skor genre-based menggunakan parameter alpha sebagai bobot penggabungan.
    
-   ![Top-10 Rekomendasi Hybrid untuk userId=2:]()
+   ![Top-10 Rekomendasi Hybrid untuk userId=2:](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/testing_Hybrid.png)
    > Insight :
    * Prediksi rating yang relatif seragam dan tidak terlalu tinggi (sekitar 3) bisa menandakan model hybrid memberikan rekomendasi yang lebih konservatif dibanding model CF murni (yang memberi rating 5).
    * Pendekatan hybrid ini mencoba menyeimbangkan antara kesamaan user (CF) dan kesesuaian genre (content-based), sehingga hasilnya cenderung lebih realistis dan tidak berlebihan.
@@ -211,45 +211,49 @@ Langkah-langkah persiapan data:
 
 
 ## 6. Evaluasi
-   ## 📊 Evaluasi Model
+   ## 📊 Metrik Evaluasi: Mean Absolute Error (MAE)
+   Untuk mengukur kinerja dari sistem rekomendasi yang dikembangkan, metrik evaluasi yang digunakan adalah Mean Absolute Error (MAE). MAE dipilih karena sesuai untuk konteks regresi seperti prediksi rating dalam sistem rekomendasi, di mana tujuan utamanya adalah meminimalkan selisih antara rating prediksi dan rating sebenarnya yang diberikan oleh pengguna.
 
-Evaluasi dilakukan untuk mengukur performa kedua model (Linear Regression dan Random Forest Regressor) pada data pelatihan dan data pengujian dengan metrik utama:
+   **Formula MAE**:
+   \[
+   MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
+   \]
 
-- **MAE (Mean Absolute Error):** Rata-rata nilai absolut selisih prediksi dan nilai aktual.
-- **MSE (Mean Squared Error):** Rata-rata kuadrat selisih prediksi dan nilai aktual, memberikan penalti lebih besar pada kesalahan besar.
-- **R2 Score (Koefisien Determinasi):** Proporsi variansi target yang bisa dijelaskan oleh model, dengan nilai maksimum 1 (semakin tinggi semakin baik).
+   > **Keterangan:**
+   - \( y_i \) = rating aktual yang diberikan pengguna ke-\(i\)
+   - \( \hat{y}_i \) = rating hasil prediksi model untuk item ke-\(i\)
+   - \( n \) = jumlah total data yang dievaluasi
+   MAE bekerja dengan menghitung rata-rata dari selisih absolut antara nilai aktual dan nilai prediksi. Nilai MAE yang lebih rendah menunjukkan performa model yang lebih baik karena berarti prediksi model lebih dekat ke nilai aktual.
+   * MAE = 0 menunjukkan bahwa prediksi model sama persis dengan nilai
+   * MAE = 1 menunjukkan bahwa rata-rata selisih absolut ant
 
----
+### Collaborative Filtering (CF)
 
-### Linear Regression
+- **Nilai MAE:** `0.8228`
 
-- Model ini menghasilkan nilai R2 sekitar 0.70 pada data pelatihan dan 0.76 pada data pengujian, yang menunjukkan model dapat menjelaskan sekitar 70-76% variansi harga rumah.
-- Nilai MAE dan MSE cukup besar, menunjukkan masih terdapat kesalahan prediksi yang cukup signifikan, terutama pada data pengujian.
+> Hasil ini menunjukkan bahwa secara rata-rata, prediksi rating yang diberikan model CF memiliki deviasi sebesar 0.82 poin dari rating sebenarnya pada skala rating yang digunakan. Ini menunjukkan bahwa model CF cukup baik dalam mempelajari pola preferensi pengguna berdasarkan kemiripan dengan pengguna lain.
+
 
 ---
 
 ### Random Forest Regressor
 
-- Setelah dilakukan tuning hyperparameter dengan GridSearchCV, model Random Forest menunjukkan peningkatan performa.
-- Nilai R2 pada data pelatihan sangat tinggi (~0.95), dan pada data pengujian meningkat menjadi sekitar 0.79, menunjukkan model dapat menangkap pola data dengan lebih baik.
-- MAE dan MSE pada data pengujian lebih kecil dibanding Linear Regression, menandakan prediksi yang lebih akurat dan kesalahan yang lebih rendah.
+- **Nilai MAE:** `1.9288`
+
+> Model hybrid yang menggabungkan Collaborative Filtering dengan pendekatan Content-Based menunjukkan deviasi yang lebih besar, yaitu sekitar 1.93 poin. Hasil ini mengindikasikan bahwa model hybrid belum mampu memberikan prediksi yang lebih akurat dibandingkan model CF murni dalam eksperimen ini.
+
 
 ---
 
-### Perbandingan Kinerja Model
+### Interpretasi
 
-| Model             | R2 Train | R2 Test | MAE Test   | MSE Test      |
-|-------------------|----------|---------|------------|---------------|
-| Linear Regression | 0.70     | 0.76    | 2064.45    | 11,744,520.00 |
-| Random Forest     | 0.95     | 0.79    | 1757.68    | 9,974,966.00  |
-
-- Random Forest menunjukkan performa yang lebih baik secara keseluruhan, terutama pada data pengujian, dengan R2 lebih tinggi dan error lebih kecil.
-- Hal ini menunjukkan Random Forest lebih mampu menangani kompleksitas data harga rumah dibanding Linear Regression.
-![Visualisasi Regresi Random Forest: Prediksi vs Nilai Aktual](https://raw.githubusercontent.com/Bumbii12/regresi-harga-rumah/refs/heads/main/images/random_f.png)
+- Model **Collaborative Filtering** lebih unggul dalam hal akurasi prediksi rating, dengan MAE yang lebih rendah.
+- Model **Hybrid Filtering** cenderung memberikan prediksi yang lebih konservatif dan kurang akurat dalam konteks data ini. Hal ini mungkin disebabkan oleh ketidaksesuaian bobot kombinasi atau representasi genre yang belum optimal.
+- MAE cocok digunakan untuk sistem rekomendasi berbasis rating karena memberikan ukuran kesalahan prediksi yang mudah diinterpretasikan dan relevan terhadap tujuan sistem, yaitu mendekati rating sebenarnya dari pengguna.
 
 
 ## 7. Kesimpulan
-Proyek ini berhasil mengembangkan dan membandingkan dua model prediksi harga rumah di wilayah Tebet, Jakarta Selatan, yaitu regresi linear dan Random Forest. Berdasarkan evaluasi dengan metrik MAE, MSE, dan R², model Random Forest memberikan performa lebih baik dengan kemampuan menangkap pola data yang kompleks dan non-linear, sehingga menghasilkan prediksi harga yang lebih akurat dibanding regresi linear. Hasil ini menunjukkan bahwa Random Forest lebih sesuai digunakan untuk prediksi harga rumah di pasar properti Tebet yang variatif. Model ini dapat membantu pembeli, penjual, dan pengembang properti dalam pengambilan keputusan harga yang lebih objektif dan realistis.
+Berdasarkan hasil eksperimen sistem rekomendasi menggunakan dataset MovieLens 100K, pendekatan *Collaborative Filtering* terbukti lebih efektif dengan nilai MAE sebesar 0.8228 dibandingkan pendekatan *Hybrid Filtering* berbasis *Random Forest Regressor* yang memiliki MAE sebesar 1.9288. Hal ini menunjukkan bahwa model CF lebih akurat dalam memprediksi rating pengguna terhadap film yang belum ditonton, meskipun pendekatan hybrid memberikan hasil yang lebih konservatif dan stabil. Proyek ini berhasil menunjukkan bahwa sistem rekomendasi memiliki potensi besar dalam meningkatkan pengalaman pengguna dengan memberikan saran film yang relevan, serta menyoroti pentingnya pemilihan metode yang tepat sesuai karakteristik data dan kebutuhan aplikasi.
 
 
 Referensi:  
