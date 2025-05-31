@@ -41,7 +41,7 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
 ### Solusi yang Diterapkan
 
 1. **Preprocessing Data**  
-   - Menggunakan dataset MovieLens 100K, dilakukan pembersihan data seperti menghapus nilai duplikat dan menggabungkan informasi film dan rating.
+   - Menggunakan dataset MovieLens, dilakukan pembersihan data seperti menghapus nilai duplikat dan menggabungkan informasi film dan rating.
    - Membuat pivot table rating pengguna dan mengolah genre film menjadi representasi vektor (multi-hot encoding) untuk pendekatan content-based.
    - Melakukan normalisasi dan filtering untuk mengatasi data sparsity.
 
@@ -105,7 +105,6 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
 3. Kondisi Data
 - Pemeriksaan Kualitas Data
   - Missing Values: 0
-  - Duplicate Data: 0
   - Distribusi Data
 
 ![distribusi genre ](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/dis_genre.png)
@@ -166,12 +165,12 @@ Langkah-langkah persiapan data:
    ![Top-10 Rekomendasi CF untuk userId=2: ](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/testing_CF.png)
    **Insight** :
    * Semua film direkomendasikan dengan prediksi rating maksimal (5.00), yang berarti:
-         * User-user tetangga yang mirip memberikan rating tinggi pada film tersebut.
-         * Model sangat yakin bahwa userId=2 juga akan menyukai film-film ini.
-      * Film yang direkomendasikan sebagian besar adalah film klasik populer dan kultus, seperti:
-         * Pulp Fiction, The Shining, Memento, Donnie Darko.
-         * Ini mengindikasikan userId=2 mungkin memiliki preferensi terhadap film-film drama, thriller, atau misteri dengan rating tinggi.
-
+      * User-user tetangga yang mirip memberikan rating tinggi pada film tersebut.
+      * Model sangat yakin bahwa userId=2 juga akan menyukai film-film ini.   
+   * Film yang direkomendasikan sebagian besar adalah film klasik populer dan kultus, seperti:
+      * Pulp Fiction, The Shining, Memento, Donnie Darko.
+      * Ini mengindikasikan userId=2 mungkin memiliki preferensi terhadap film-film drama, thriller, atau misteri dengan rating tinggi.
+  
    #### Kelebihan:
    - Tidak memerlukan informasi konten film.
    - Cocok untuk skenario dengan jumlah pengguna aktif yang besar.
