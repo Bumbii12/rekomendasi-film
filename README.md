@@ -164,7 +164,7 @@ Langkah-langkah persiapan data:
    - Top-N rekomendasi disajikan berdasarkan prediksi rating tertinggi dari film-film yang belum dirating oleh pengguna.
 
    ![Top-10 Rekomendasi CF untuk userId=2: ](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/testing_CF.png)
-   > Insight :
+   **Insight** :
       * Semua film direkomendasikan dengan prediksi rating maksimal (5.00), yang berarti:
          * User-user tetangga yang mirip memberikan rating tinggi pada film tersebut.
          * Model sangat yakin bahwa userId=2 juga akan menyukai film-film ini.
@@ -194,7 +194,7 @@ Langkah-langkah persiapan data:
    - Menggabungkan skor CF dan skor genre-based menggunakan parameter alpha sebagai bobot penggabungan.
    
    ![Top-10 Rekomendasi Hybrid untuk userId=2:](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/testing_Hybrid.png)
-   > Insight :
+   **Insight** :
       * Prediksi rating yang relatif seragam dan tidak terlalu tinggi (sekitar 3) bisa menandakan model hybrid memberikan rekomendasi yang lebih konservatif dibanding model CF murni (yang memberi rating 5).
       * Pendekatan hybrid ini mencoba menyeimbangkan antara kesamaan user (CF) dan kesesuaian genre (content-based), sehingga hasilnya cenderung lebih realistis dan tidak berlebihan.
       * Ini dapat membantu memberikan rekomendasi yang lebih bervariasi dan tidak terlalu optimistik, tapi mungkin perlu peningkatan agar prediksi lebih akurat dan nilai ratingnya lebih dekat ke preferensi nyata user.
