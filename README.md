@@ -106,131 +106,106 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
   - Duplicate Data: 0
   - Distribusi Data
 
-![distribusi data](https://raw.githubusercontent.com/Bumbii12/regresi-harga-rumah/refs/heads/main/images/distribusi_data.png)
+![distribusi genre ](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/dis_genre.png)
+> Distribusi genre seperti ini terlihat setelah data genre setiap film dipisah terlebih dahulu, karen terdapat film yang memiliki lebih dari satu genre. Distribusi tertinggi terdapat pada genre Drama.
 
-  - Tampilan Dataset
-
-Tampilan dataset awal dalam bentuk _DataFrame pandas_.  
-
-| NO | NAMA RUMAH                                                      | HARGA        | LB  | LT  | KT | KM | GRS |
-|----|------------------------------------------------------------------|--------------|-----|-----|----|----|-----|
-| 1  | Rumah Murah Hook Tebet Timur, Tebet, Jakarta Selatan            | 3.800.000.000 | 220 | 220 | 3  | 3  | 0   |
-| 2  | Rumah Modern di Tebet dekat Stasiun, Tebet, Jakarta Selatan     | 4.600.000.000 | 180 | 137 | 4  | 3  | 2   |
-| 3  | Rumah Mewah 2 Lantai Hanya 3 Menit Ke Tebet, Tebet, Jakarta     | 3.000.000.000 | 267 | 250 | 4  | 4  | 4   |
-| 4  | Rumah Baru Tebet, Tebet, Jakarta Selatan                        |   430.000.000 |  40 |  25 | 2  | 2  | 0   |
-| 5  | Rumah Bagus Tebet komp Gudang Peluru lt 350m, Tebet, Jakarta    | 9.000.000.000 | 400 | 355 | 6  | 5  | 3   |
-
-
+![distribusi rating ](https://raw.githubusercontent.com/Bumbii12/rekomendasi-film/refs/heads/main/img/dis_ratings.png)
+> Distribusi tertinggi terdapat pada rating 4.0, sedangkan distribusi rentang yang terkecil terdapat pada rating 0.5
 ***
 
 ## 4. Data Preparation
 
 Langkah-langkah persiapan data:
 
-1. **Pengecekan Duplikat & Missing Values**  
-   Data diperiksa untuk mengetahui apakah terdapat duplikasi dan nilai kosong pada setiap kolom.  
-   ✅ Tidak ditemukan data duplikat maupun nilai kosong.
+1. **Ekstraksi Genre Menjadi Kolom Biner**  
+   Data genre pada dataset movies.csv awalnya berada dalam satu kolom dengan format teks, dipisahkan oleh karakter | (contoh: Action|Comedy|Romance).
+   Kolom genres kemudian diubah menjadi beberapa kolom biner (0/1) menggunakan teknik One-Hot Encoding, sehingga setiap genre menjadi fitur tersendiri.
+   > ✅ Hal ini mempermudah analisis dan memungkinkan penggunaan genre sebagai fitur tambahan di model hybrid atau content-based.
 
-2. **Standarisasi Nama Kolom**  
-   Nama-nama kolom diubah menjadi huruf kecil semua agar konsisten dan memudahkan proses analisis selanjutnya.
+2. **Penggabungan Dataset movies dan ratings**  
+   Dataset movies (yang sudah mengandung kolom genre biner) digabungkan dengan dataset ratings berdasarkan kolom movieId.
+   Hasilnya adalah dataframe gabungan df yang menyimpan informasi rating, judul film, serta genre-genre film.
+   > ✅ Penggabungan ini penting untuk menyatukan informasi pengguna dan film dalam satu struktur data.
 
-3. **Normalisasi Harga & Pembersihan Data**  
-   - Nilai pada kolom `harga` dikonversi dari satuan Rupiah ke juta Rupiah agar lebih mudah dibaca.  
-   - Kolom `nomor` juga dihapus karena tidak memiliki pengaruh signifikan terhadap analisis.
+3. **Pembagian Data (Train-Test Split)**  
+   Dataset df dibagi menjadi dua bagian:
+   - df_train: 70% data untuk pelatihan model.
+   - df_test: 30% data untuk pengujian model.
+   Digunakan random_state=42 untuk memastikan hasil pembagian selalu konsisten saat dijalankan ulang.
 
-4. **Pembuatan Label Kategori Harga**  
-   Kategori harga ditentukan berdasarkan nilai kuartil:  
-   - `Murah`: harga ≤ Q1  
-   - `Menengah`: Q1 < harga ≤ Median  
-   - `Mahal`: harga > Median  
-   Kolom baru bernama `tingkat_harga` ditambahkan ke dataset.
+4. **Pembuatan User-Item Rating Matrix**  
+   Dibuat pivot table dari df_train yang menempatkan userId sebagai baris, movieId sebagai kolom, dan rating sebagai nilai.
+   Nilai kosong diisi dengan 0 (artinya belum memberikan rating).
+   > ✅ Matriks ini dibutuhkan sebagai input utama untuk algoritma Collaborative Filtering.
 
-5. **Visualisasi Distribusi Fitur**  
-   Distribusi untuk fitur numerik divisualisasikan:  
-   - Fitur `harga`, `luas bangunan (lb)`, dan `luas tanah (lt)` memiliki distribusi miring ke kanan (positively skewed).  
-   - Fitur `jumlah kamar tidur (kt)`, `kamar mandi (km)`, dan `garasi (grs)` menunjukkan distribusi diskrit dengan puncak pada nilai 3–5.
+5. **Konversi Matriks ke Bentuk Sparse Matrix**  
+   Karena mayoritas sel pada user-item matrix bernilai 0, matriks tersebut dikonversi ke format Compressed Sparse Row (CSR) menggunakan csr_matrix.
+   > ✅ Format sparse ini menghemat memori dan mempercepat proses komputasi saat melatih model.
 
-6. **Deteksi Outlier dengan Boxplot**  
-   Hampir semua fitur mengandung outlier, terutama pada `harga`, `lt`, dan `lb`.  
-   Outlier **tidak dihapus** karena:
-   - Mewakili variasi nyata dalam pasar properti (misal rumah mewah).
-   - Penting untuk model pembelajaran, terutama regresi.
-   - Tidak mengganggu hubungan antar variabel utama.
+6. **Pemetaan userId ke Index dan Sebaliknya**  
+   Dibuat dua dictionary:
+   - user_id_to_index: mapping dari userId ke indeks numerik.
+   -index_to_user_id: mapping dari indeks kembali ke userId.
+   > ✅ Mapping ini diperlukan karena beberapa algoritma seperti KNN bekerja dengan indeks numerik, bukan ID asli.
 
-7. **Analisis Korelasi**  
-   Korelasi antara variabel numerik dihitung dan divisualisasikan:  
-   - Korelasi kuat ditemukan antara `harga` dengan `lt (0.81)` dan `lb (0.75)`.  
-   - Fitur lain seperti `kt`, `km`, dan `grs` memiliki korelasi lebih rendah tapi tetap memberikan kontribusi.
-
-8. **Visualisasi Kategori Harga**  
-   Diagram batang dibuat untuk menunjukkan distribusi jumlah rumah berdasarkan kategori harga:  
-   - `Mahal` adalah kategori dengan jumlah rumah terbanyak.  
-   - Diikuti oleh `Menengah`, dan terakhir `Murah`.
-
-9. **Pemilihan Fitur (Feature Selection)**
-   Untuk membangun model regresi, dilakukan pemilihan fitur yang digunakan sebagai variabel independen (X).
-   Fitur-fitur yang dipilih adalah:
-   - lb (luas bangunan)
-   - lt (luas tanah)
-   - kt (jumlah kamar tidur)
-   - km (jumlah kamar mandi)
-   - grs (jumlah garasi)
-> Pemilihan ini didasarkan pada domain knowledge bahwa variabel-variabel tersebut secara langsung memengaruhi harga rumah, serta hasil analisis korelasi yang menunjukkan bahwa lt dan lb memiliki hubungan yang signifikan terhadap harga.
-
-10. **Data Splitting**
-   Data dipecah menjadi 3 bagian:
-   - 70% untuk training model
-   - 30% untuk pengujian model
 
 ## 5. Modeling
-   Modeling dilakukan untuk memprediksi harga rumah berdasarkan fitur numerik yang telah dipilih. Dua algoritma digunakan dan dibandingkan performanya, yaitu Linear Regression dan Random Forest Regressor.
+   Sistem rekomendasi dikembangkan untuk membantu pengguna menemukan film yang sesuai dengan preferensi mereka berdasarkan histori rating pengguna lain dan informasi konten film (genre). Dua pendekatan berbeda digunakan, yaitu Collaborative Filtering dan Hybrid Filtering.
 
 
-   ### 1. Linear Regression
-   Linear Regression adalah algoritma regresi yang sederhana dan umum digunakan untuk memodelkan hubungan linear antara fitur (misal: luas bangunan, luas tanah, jumlah kamar) dengan target (harga rumah).
+   ### 1. Collaborative Filtering (CF)
+   Model Collaborative Filtering berbasis kemiripan antar pengguna (user-user similarity). Model ini memanfaatkan rating yang diberikan oleh pengguna-pengguna lain yang memiliki preferensi serupa untuk memprediksi rating yang mungkin diberikan oleh target user terhadap film yang belum ditonton.
 
    #### Proses:
-   - Model dilatih menggunakan data pelatihan.
-   - Tidak memerlukan tuning hyperparameter dalam implementasi dasarnya.
-   - Cocok untuk data dengan hubungan linear antar variabel.
+   - Menggunakan algoritma K-Nearest Neighbors (KNN) dengan cosine similarity untuk menemukan tetangga terdekat dari pengguna target.
+   - Rating diprediksi menggunakan rata-rata tertimbang dari rating pengguna-pengguna serupa terhadap film tertentu.
+   - Top-N rekomendasi disajikan berdasarkan prediksi rating tertinggi dari film-film yang belum dirating oleh pengguna.
+
+   ![Top-10 Rekomendasi CF untuk userId=2: ]()
+   > Insight :
+   * Semua film direkomendasikan dengan prediksi rating maksimal (5.00), yang berarti:
+      * User-user tetangga yang mirip memberikan rating tinggi pada film tersebut.
+      * Model sangat yakin bahwa userId=2 juga akan menyukai film-film ini.
+   * Film yang direkomendasikan sebagian besar adalah film klasik populer dan kultus, seperti:
+      * Pulp Fiction, The Shining, Memento, Donnie Darko.
+      * Ini mengindikasikan userId=2 mungkin memiliki preferensi terhadap film-film drama, thriller, atau misteri dengan rating tinggi.
 
    #### Kelebihan:
-   - Mudah dipahami dan diinterpretasikan.
-   - Proses pelatihan cepat dan efisien.
-   - Cocok untuk pola data linear.
+   - Tidak memerlukan informasi konten film.
+   - Cocok untuk skenario dengan jumlah pengguna aktif yang besar.
+   - Menghasilkan rekomendasi yang bersifat personalized dan seringkali akurat jika data rating cukup padat.
 
    #### Kekurangan:
-   - Kurang fleksibel untuk data non-linear.
-   - Rentan terhadap outlier dan multikolinearitas.
-   - Akurasi menurun jika data tidak linear.
+   - Tidak dapat memberikan rekomendasi untuk user atau item baru (cold start problem).
+   - Rentan terhadap sparsity jika banyak pengguna belum memberikan rating.
+   - Bergantung penuh pada rating historis.
 
    ---
 
    ### 2. Random Forest Regressor
-   Random Forest Regressor adalah metode ensemble berbasis decision tree yang membangun banyak pohon dan menggabungkan hasilnya untuk prediksi yang lebih baik.
+   Model Hybrid Filtering menggabungkan Collaborative Filtering dengan pendekatan Content-Based Filtering. Pendekatan ini bertujuan untuk mengatasi kekurangan masing-masing metode dengan memadukan keunggulan keduanya.
 
    #### Proses:
-   - Model diinisialisasi dengan random_state=42 untuk memastikan reprodusibilitas.
-   - Tuning hyperparameter dilakukan menggunakan GridSearchCV dengan kombinasi:
-   - n_estimators: [50, 100, 200]
-   - max_depth: [None, 10, 20]
-   - Model terbaik dipilih berdasarkan nilai R² tertinggi pada validasi silang (cross-validation).
-   Parameter Akhir Model:
-   - random_state: 42
-   - n_estimators: 200
-   - max_depth: 20
-   > (diperoleh dari grid_search.best_params_)
-
+   - Menggunakan algoritma CF seperti sebelumnya untuk menghitung prediksi rating dari user-user yang mirip.
+   - Membangun user profile berdasarkan rata-rata preferensi genre yang disukai oleh pengguna.
+   - nMenentukan movie profile dari representasi genre setiap film.
+   - Menggabungkan skor CF dan skor genre-based menggunakan parameter alpha sebagai bobot penggabungan.
+   
+   ![Top-10 Rekomendasi Hybrid untuk userId=2:]()
+   > Insight :
+   * Prediksi rating yang relatif seragam dan tidak terlalu tinggi (sekitar 3) bisa menandakan model hybrid memberikan rekomendasi yang lebih konservatif dibanding model CF murni (yang memberi rating 5).
+   * Pendekatan hybrid ini mencoba menyeimbangkan antara kesamaan user (CF) dan kesesuaian genre (content-based), sehingga hasilnya cenderung lebih realistis dan tidak berlebihan.
+   * Ini dapat membantu memberikan rekomendasi yang lebih bervariasi dan tidak terlalu optimistik, tapi mungkin perlu peningkatan agar prediksi lebih akurat dan nilai ratingnya lebih dekat ke preferensi nyata user.
+   
    #### Kelebihan:
-   - Mampu menangani pola non-linear.
-   - Lebih tahan terhadap outlier.
-   - Memberikan estimasi pentingnya fitur.
-   - Performa lebih stabil daripada single decision tree.
+   - Mengatasi masalah cold start pada Collaborative Filtering dengan memanfaatkan konten film.
+   - Meningkatkan akurasi dengan mengombinasikan informasi perilaku dan konten.
+   - Memberikan rekomendasi yang lebih stabil dan tidak terlalu bias pada kelompok tertentu.
 
    #### Kekurangan:
-   - Lebih lambat dalam pelatihan dan prediksi.
-   - Kurang interpretatif dibanding linear regression.
-   - Risiko overfitting jika tuning tidak optimal.
+   - Lebih kompleks dalam implementasi dan tuning parameter (misal: alpha).
+   - Bergantung pada kualitas informasi konten (genre, metadata film).
+   - Bisa menghasilkan prediksi yang terlalu konservatif jika bobot genre terlalu dominan.
 
    ---
 
