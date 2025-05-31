@@ -216,15 +216,15 @@ Langkah-langkah persiapan data:
    ## 📊 Metrik Evaluasi: Mean Absolute Error (MAE)
    Untuk mengukur kinerja dari sistem rekomendasi yang dikembangkan, metrik evaluasi yang digunakan adalah Mean Absolute Error (MAE). MAE dipilih karena sesuai untuk konteks regresi seperti prediksi rating dalam sistem rekomendasi, di mana tujuan utamanya adalah meminimalkan selisih antara rating prediksi dan rating sebenarnya yang diberikan oleh pengguna.
 
-   **Formula MAE**:
-   \[
-   MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|
-   \]
+   **Formula MAE:**
 
-   > **Keterangan:**
-   - \( y_i \) = rating aktual yang diberikan pengguna ke-\(i\)
-   - \( \hat{y}_i \) = rating hasil prediksi model untuk item ke-\(i\)
-   - \( n \) = jumlah total data yang dievaluasi
+   MAE = (1 / n) * Σ |yᵢ - ŷᵢ|
+
+   **Keterangan:**
+   - yᵢ = rating aktual dari pengguna ke-i
+   - ŷᵢ = rating hasil prediksi untuk item ke-i
+   - n = jumlah data yang dievaluasi
+   dievaluasi
    MAE bekerja dengan menghitung rata-rata dari selisih absolut antara nilai aktual dan nilai prediksi. Nilai MAE yang lebih rendah menunjukkan performa model yang lebih baik karena berarti prediksi model lebih dekat ke nilai aktual.
    * MAE = 0 menunjukkan bahwa prediksi model sama persis dengan nilai
    * MAE = 1 menunjukkan bahwa rata-rata selisih absolut ant
