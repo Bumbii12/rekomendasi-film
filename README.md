@@ -76,6 +76,7 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
 - genres: Genre film, dipisahkan oleh tanda | (string).
 
 - Tampilan dataset movies.csv awal dalam bentuk _DataFrame pandas_.  
+
 | movieId | title                              | genres                                     |
 |---------|------------------------------------|--------------------------------------------|
 | 1       | Toy Story (1995)                   | Adventure\|Animation\|Children\|Comedy\|Fantasy |
@@ -91,6 +92,7 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
 - timestamp: Waktu rating diberikan (integer, format Unix timestamp).
 
 - Tampilan dataset ratings.csv awal dalam bentuk _DataFrame pandas_.  
+
 | userId | movieId | rating | timestamp |
 |--------|---------|--------|-----------|
 | 1      | 1       | 4.0    | 964982703 |
