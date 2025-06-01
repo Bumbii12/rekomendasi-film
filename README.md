@@ -149,6 +149,14 @@ Langkah-langkah persiapan data:
    -index_to_user_id: mapping dari indeks kembali ke userId.
    > ✅ Mapping ini diperlukan karena beberapa algoritma seperti KNN bekerja dengan indeks numerik, bukan ID asli.
 
+7. **Penggabungan Tambahan untuk Model Hybrid**  
+   Sebelum membuat profil pengguna berbasis genre untuk model hybrid, dilakukan penggabungan ulang antara `df_train` dan `movies_with_genres` menggunakan `movieId` sebagai kunci.  
+   > ✅ Penggabungan ini memastikan bahwa setiap baris dalam `df_train` memiliki informasi genre yang lengkap dan sesuai, sehingga dapat digunakan untuk menghitung preferensi genre pengguna secara akurat.
+
+8. **Pembuatan User Profile Berdasarkan Genre (Untuk Model Hybrid)**  
+   Setelah penggabungan, profil pengguna dibuat dengan menghitung rata-rata nilai biner genre untuk setiap `userId`.  
+   Artinya, jika seorang user sering memberi rating tinggi pada film bergenre Action dan Sci-Fi, maka profilnya akan menunjukkan preferensi tinggi terhadap genre tersebut.  
+   > ✅ Profil ini digunakan dalam model hybrid untuk menghitung kesesuaian antara preferensi genre user dan genre film yang akan direkomendasikan.
 
 ## 5. Modeling
    Sistem rekomendasi dikembangkan untuk membantu pengguna menemukan film yang sesuai dengan preferensi mereka berdasarkan histori rating pengguna lain dan informasi konten film (genre). Dua pendekatan berbeda digunakan, yaitu Collaborative Filtering dan Hybrid Filtering.

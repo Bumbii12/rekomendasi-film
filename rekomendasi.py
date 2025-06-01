@@ -28,7 +28,8 @@ Pada tahap ini, dataset akan disiapkan sehingga siap untuk masuk ketahap permode
 
 Pada tahap ini saya memuat dataset review hotel dengan format CSV. Dataset dapat diunduh pada link ini [Grouplens-MovieLens Latest Datasets](https://grouplens.org/datasets/movielens/latest/).
 
-Saya menggunakan 2 datset saja, yaitu **movies.csv** dan **rating.csv**
+Pada tahap ini, dua file dataset utama dari MovieLens yaitu `movies.csv` dan `ratings.csv` dimuat ke dalam DataFrame.  
+File `movies.csv` berisi informasi judul dan genre film, sedangkan `ratings.csv` berisi data rating dari setiap pengguna terhadap film tertentu.
 """
 
 movies = pd.read_csv('movies.csv')
@@ -86,11 +87,12 @@ plt.xticks(rotation=90)
 plt.tight_layout()
 plt.show()
 
-"""Insight : Distribusi genre seperti ini terlihat setelah data genre setiap film dipisah terlebih dahulu, karen terdapat film yang memiliki lebih dari satu genre"""
+"""Insight : Distribusi genre menjadi lebih akurat setelah genre tiap film dipisahkan, karena banyak film memiliki lebih dari satu genre. Informasi ini penting untuk memahami preferensi genre secara menyeluruh, sehingga analisis tren dan rekomendasi film bisa lebih tepat sasaran."""
 
 sns.countplot(data=ratings,x='rating')
 
-"""Insight : dapat dilihat persebaran data setiap rating, ini akan digunakan untuk rekomendasi
+"""Insight : Grafik di bawah menunjukkan jumlah rating yang diberikan oleh pengguna pada skala 0.5 hingga 5.0.  
+Terlihat bahwa sebagian besar pengguna memberikan rating yang cukup tinggi (sekitar 3.0 hingga 4.0), yang menunjukkan bahwa pengguna cenderung memberikan ulasan positif terhadap film.
 
 #Data Preprosessing
 
@@ -154,6 +156,12 @@ Prediksi rating dihitung berdasarkan rating yang diberikan oleh user lain yang m
 - Menghitung rata-rata tertimbang dari rating tetangga terhadap film tersebut.
 
 ##Model Training
+
+Fungsi `predict_rating_cf` digunakan untuk memprediksi rating yang mungkin diberikan oleh seorang user terhadap sebuah film berdasarkan kemiripan dengan user lain.  
+Langkah-langkah di dalam fungsi ini mencakup:
+- Mengambil tetangga terdekat dari user (menggunakan cosine similarity).
+- Menghitung rata-rata tertimbang dari rating yang diberikan oleh user-user tetangga.
+- Mengembalikan prediksi rating sebagai hasil dari kolaborasi antar user.
 """
 
 def predict_rating_cf(user_id, movie_id, k=5):
@@ -248,6 +256,16 @@ Model Hybrid menggabungkan dua pendekatan rekomendasi:
 * Content-Based Filtering: memprediksi rating berdasarkan kesesuaian genre film dengan preferensi user.
 
 ##Model Training
+
+Fungsi `predict_rating_hybrid` digunakan untuk memprediksi rating yang mungkin diberikan oleh seorang user terhadap sebuah film dengan menggabungkan dua pendekatan, yaitu Collaborative Filtering dan Content-Based Filtering.
+
+Langkah-langkah utama dalam fungsi ini meliputi:
+- Menghitung skor Collaborative Filtering berdasarkan rating dari user tetangga terdekat menggunakan cosine similarity.
+- Menghitung skor berbasis genre dengan mengalikan profil preferensi genre user dan profil genre film.
+- Menggabungkan kedua skor tersebut menggunakan bobot `alpha` untuk mendapatkan prediksi rating akhir.
+- Jika salah satu skor tidak tersedia, fungsi akan menggunakan skor yang ada sebagai prediksi.
+
+Parameter `alpha` mengatur proporsi kontribusi Collaborative Filtering dalam prediksi akhir.
 """
 
 # Gabungkan data training dengan genre
