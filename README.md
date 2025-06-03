@@ -19,15 +19,16 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
 ### Problem Statements
 
 - Bagaimana cara merekomendasikan film yang relevan bagi pengguna berdasarkan data interaksi dan/atau informasi konten film?
-- Pendekatan sistem rekomendasi mana yang lebih efektif dalam menghasilkan rekomendasi akurat dan personal: Content-Based Filtering atau Collaborative Filtering?
+- Pendekatan sistem rekomendasi mana yang lebih efektif dalam menghasilkan rekomendasi akurat dan personal: Hybrid Filtering atau Collaborative Filtering?
 
 ### Goals
 
 - Mengembangkan sistem rekomendasi film berbasis data pengguna dan konten film.
 
-- Menerapkan dan membandingkan dua pendekatan rekomendasi: Content-Based Filtering dan Collaborative Filtering.
+- Menerapkan dan membandingkan dua pendekatan rekomendasi: Hybrid Filtering dan Collaborative Filtering.
 
 - Mengevaluasi performa sistem menggunakan metrik seperti Mean Absolute Error (MAE).
+
 ### Manfaat
 
 - Membantu pengguna menemukan film sesuai preferensi dengan lebih cepat dan efisien.
@@ -45,10 +46,12 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
    - Membuat pivot table rating pengguna dan mengolah genre film menjadi representasi vektor (multi-hot encoding) untuk pendekatan content-based.
    - Melakukan normalisasi dan filtering untuk mengatasi data sparsity.
 
-2. **Content-Based Filtering**  
-   - Membuat profil pengguna berdasarkan rata-rata genre film yang disukai.
-   - Menghitung kemiripan antar film menggunakan cosine similarity pada fitur genre.
-   - Merekomendasikan film berdasarkan kemiripan konten dengan film yang sebelumnya diberi rating tinggi oleh pengguna.
+2. **Hybrid Filtering**  
+   - Menggabungkan pendekatan Content-Based dan Collaborative Filtering.  
+   - **Content-Based**: Membuat profil pengguna berdasarkan rata-rata genre film yang disukai (user_profiles), serta membuat profil film berdasarkan genre (movie_profiles).  
+   - **Collaborative Filtering**: Menggunakan pendekatan user-based atau item-based collaborative filtering, dengan perhitungan kemiripan menggunakan cosine similarity.  
+   - Sistem rekomendasi mengombinasikan kedua pendekatan tersebut untuk memberikan rekomendasi yang lebih personal dan akurat.
+
 
 3. **Collaborative Filtering**  
    - Menggunakan pendekatan user-based atau item-based collaborative filtering.
@@ -71,7 +74,6 @@ Hybrid Filtering – menggabungkan Collaborative Filtering dengan Content-Based 
 
 #### Kolom datset movies.csv:
 - movieId: ID unik untuk setiap film
-- NAMA RUMAH : title rumah.
 - title: Judul film beserta tahun rilis
 - genres: Genre film, dipisahkan oleh tanda | (string).
 
@@ -157,6 +159,10 @@ Langkah-langkah persiapan data:
    Setelah penggabungan, profil pengguna dibuat dengan menghitung rata-rata nilai biner genre untuk setiap `userId`.  
    Artinya, jika seorang user sering memberi rating tinggi pada film bergenre Action dan Sci-Fi, maka profilnya akan menunjukkan preferensi tinggi terhadap genre tersebut.  
    > ✅ Profil ini digunakan dalam model hybrid untuk menghitung kesesuaian antara preferensi genre user dan genre film yang akan direkomendasikan.
+9. **Pembuatan Movie Profile Berdasarkan Genre**  
+   Dataset `movies_with_genres` diindeks ulang berdasarkan `movieId` untuk membentuk `movie_profiles`.  
+   Setiap baris dalam `movie_profiles` merepresentasikan sebuah film dalam bentuk vektor biner genre.  
+   > ✅ Profil film ini digunakan untuk mencocokkan preferensi pengguna (user_profiles) dengan karakteristik film dalam model hybrid.
 
 ## 5. Modeling
    Sistem rekomendasi dikembangkan untuk membantu pengguna menemukan film yang sesuai dengan preferensi mereka berdasarkan histori rating pengguna lain dan informasi konten film (genre). Dua pendekatan berbeda digunakan, yaitu Collaborative Filtering dan Hybrid Filtering.
@@ -191,7 +197,7 @@ Langkah-langkah persiapan data:
 
    ---
 
-   ### 2. Random Forest Regressor
+   ### 2. Model Hybrid Filtering 
    Model Hybrid Filtering menggabungkan Collaborative Filtering dengan pendekatan Content-Based Filtering. Pendekatan ini bertujuan untuk mengatasi kekurangan masing-masing metode dengan memadukan keunggulan keduanya.
 
    #### Proses:
@@ -245,7 +251,7 @@ Langkah-langkah persiapan data:
 
 ---
 
-### Random Forest Regressor
+### Model Hybrid Filtering 
 
 - **Nilai MAE:** `1.9288`
 
@@ -262,7 +268,7 @@ Langkah-langkah persiapan data:
 
 
 ## 7. Kesimpulan
-Berdasarkan hasil eksperimen sistem rekomendasi menggunakan dataset MovieLens 100K, pendekatan *Collaborative Filtering* terbukti lebih efektif dengan nilai MAE sebesar 0.8228 dibandingkan pendekatan *Hybrid Filtering* berbasis *Random Forest Regressor* yang memiliki MAE sebesar 1.9288. Hal ini menunjukkan bahwa model CF lebih akurat dalam memprediksi rating pengguna terhadap film yang belum ditonton, meskipun pendekatan hybrid memberikan hasil yang lebih konservatif dan stabil. Proyek ini berhasil menunjukkan bahwa sistem rekomendasi memiliki potensi besar dalam meningkatkan pengalaman pengguna dengan memberikan saran film yang relevan, serta menyoroti pentingnya pemilihan metode yang tepat sesuai karakteristik data dan kebutuhan aplikasi.
+Berdasarkan hasil eksperimen sistem rekomendasi menggunakan dataset MovieLens 100K, pendekatan *Collaborative Filtering* terbukti lebih efektif dengan nilai MAE sebesar 0.8228 dibandingkan pendekatan *Hybrid Filtering* yang memiliki MAE sebesar 1.9288. Hal ini menunjukkan bahwa model CF lebih akurat dalam memprediksi rating pengguna terhadap film yang belum ditonton, meskipun pendekatan hybrid memberikan hasil yang lebih konservatif dan stabil. Proyek ini berhasil menunjukkan bahwa sistem rekomendasi memiliki potensi besar dalam meningkatkan pengalaman pengguna dengan memberikan saran film yang relevan, serta menyoroti pentingnya pemilihan metode yang tepat sesuai karakteristik data dan kebutuhan aplikasi.
 
 
 Referensi:  
